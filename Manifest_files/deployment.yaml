@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-frontend  # ✅ Shorter and better naming
+  namespace: DEPLOY_NAMESPACE
+  labels:
+    app: grafana-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-frontend
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+  template:
+    metadata:
+      labels:
+        app: grafana-frontend
+    spec:
+      containers:
+        - name: grafana
+          image: NEW_ECR_IMAGE  # 🔹 Updated by GitHub Actions
+          ports:
+            - containerPort: 3000
+            
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1024Mi"
