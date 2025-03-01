@@ -101,5 +101,5 @@ jobs:
 
       - name: Verify Deployment
         run: |
-          kubectl rollout status deployment/grafana -n ${{ env.DEPLOY_NAMESPACE }} --timeout=5m
+          kubectl rollout status deployment/grafana-frontend -n ${{ env.DEPLOY_NAMESPACE }} --timeout=5m
           kubectl get pods -n ${{ env.DEPLOY_NAMESPACE }}
