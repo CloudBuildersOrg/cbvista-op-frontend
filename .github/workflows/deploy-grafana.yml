@@ -1,0 +1,106 @@
+name: CBT-Vista-Grafana-Frontend
+
+on:
+  push:
+    branches:
+      - develop
+      - sandbox
+      - main
+  workflow_dispatch:
+
+jobs:
+  CBT-Vista-Grafana-Frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Determine Namespace Based on Branch
+        run: |
+          case "${{ github.ref_name }}" in
+            "develop")
+              echo "DEPLOY_NAMESPACE=dev" >> $GITHUB_ENV
+              ;;
+            "sandbox")
+              echo "DEPLOY_NAMESPACE=sandbox" >> $GITHUB_ENV
+              ;;
+            "main")
+              echo "DEPLOY_NAMESPACE=prod" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Invalid branch for deployment: ${{ github.ref_name }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Configure AWS Credentials (IAM Role)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          retry-max-attempts: 3
+
+      - name: Install AWS CLI & Kubectl
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y awscli
+          curl -LO "https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+      - name: Build, Tag, and Push Docker Image
+        run: |
+          IMAGE_TAG=$(git rev-parse --short HEAD)
+          IMAGE_URI="${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}"
+
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
+
+          echo "Building Docker Image: $IMAGE_URI"
+
+          docker build -t custom-grafana .
+          docker tag custom-grafana "$IMAGE_URI"
+          docker push "$IMAGE_URI"
+
+          echo "Successfully pushed $IMAGE_URI"
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+      - name: Ensure Namespace Exists in Kubernetes
+        run: |
+          kubectl create namespace ${{ env.DEPLOY_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Update Kubernetes Deployment YAML with Latest Image
+        run: |
+          sed -i "s|NEW_ECR_IMAGE|${{ env.IMAGE_URI }}|g" Manifest_files/deployment.yaml
+          sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/deployment.yaml
+          sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/service.yaml
+
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f Manifest_files/deployment.yaml
+          kubectl apply -f Manifest_files/service.yaml
+          echo "Deployment applied to ${{ env.DEPLOY_NAMESPACE }}"
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/grafana -n ${{ env.DEPLOY_NAMESPACE }} --timeout=5m
+          kubectl get pods -n ${{ env.DEPLOY_NAMESPACE }}

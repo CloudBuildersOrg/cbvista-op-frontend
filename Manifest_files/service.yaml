@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-frontend
+  namespace: DEPLOY_NAMESPACE
+  labels:
+    app: grafana-frontend
+spec:
+  selector:
+    app: grafana-frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000  
+  type: ClusterIP 
