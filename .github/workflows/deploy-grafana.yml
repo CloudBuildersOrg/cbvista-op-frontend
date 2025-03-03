@@ -28,7 +28,7 @@ jobs:
         run: |
           case "${{ github.ref_name }}" in
             "develop")
-              echo "DEPLOY_NAMESPACE=dev" >> $GITHUB_ENV
+              echo "DEPLOY_NAMESPACE=monitoring" >> $GITHUB_ENV
               ;;
             "sandbox")
               echo "DEPLOY_NAMESPACE=sandbox" >> $GITHUB_ENV
