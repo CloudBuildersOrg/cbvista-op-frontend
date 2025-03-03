@@ -83,9 +83,15 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
 
+      - name: Verify Kubernetes Authentication
+        run: |
+          kubectl config view
+          kubectl get nodes
+          kubectl cluster-info
+          
       - name: Ensure Namespace Exists in Kubernetes
         run: |
-          kubectl create namespace ${{ env.DEPLOY_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl get namespace ${{ env.DEPLOY_NAMESPACE }} || kubectl create namespace ${{ env.DEPLOY_NAMESPACE }}
 
       - name: Update Kubernetes Deployment YAML with Latest Image
         run: |
