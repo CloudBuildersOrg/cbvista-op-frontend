@@ -98,6 +98,13 @@ jobs:
           sed -i "s|NEW_ECR_IMAGE|${{ env.IMAGE_URI }}|g" Manifest_files/deployment.yaml
           sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/deployment.yaml
           sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/service.yaml
+          
+      - name: Inject GitHub Secrets into Deployment File
+        run: |
+          sed -i "s|GF_DATABASE_HOST_VALUE|${{ secrets.GF_DATABASE_HOST }}|g" Manifest_files/deployment.yaml
+          sed -i "s|GF_DATABASE_NAME_VALUE|${{ secrets.GF_DATABASE_NAME }}|g" Manifest_files/deployment.yaml
+          sed -i "s|GF_DATABASE_USER_VALUE|${{ secrets.GF_DATABASE_USER }}|g" Manifest_files/deployment.yaml
+          sed -i "s|GF_DATABASE_PASSWORD_VALUE|${{ secrets.GF_DATABASE_PASSWORD }}|g" Manifest_files/deployment.yaml
 
       - name: Deploy to EKS
         run: |

@@ -41,29 +41,17 @@ spec:
             - name: GF_SERVER_HTTP_PORT
               value: "3000"
 
-            # Database Configuration (Pulled from Kubernetes Secret)
+            # Database Configuration (GitHub Secrets Replace These at Runtime)
             - name: GF_DATABASE_TYPE
               value: "postgres"
             - name: GF_DATABASE_HOST
-              valueFrom:
-                  secretKeyRef:
-                    name: grafana-secrets
-                    key: GF_DATABASE_HOST
+              value: "GF_DATABASE_HOST_VALUE"  # Placeholder replaced by GitHub Actions
             - name: GF_DATABASE_NAME
-              valueFrom:
-                  secretKeyRef:
-                    name: grafana-secrets
-                    key: GF_DATABASE_NAME
+              value: "GF_DATABASE_NAME_VALUE"
             - name: GF_DATABASE_USER
-              valueFrom:
-                  secretKeyRef:
-                    name: grafana-secrets
-                    key: GF_DATABASE_USER
+              value: "GF_DATABASE_USER_VALUE"
             - name: GF_DATABASE_PASSWORD
-              valueFrom:
-                  secretKeyRef:
-                    name: grafana-secrets
-                    key: GF_DATABASE_PASSWORD
+              value: "GF_DATABASE_PASSWORD_VALUE"
             - name: GF_DATABASE_SSL_MODE
               value: "verify-full"
             - name: GF_DATABASE_CA_CERT_PATH
