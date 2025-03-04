@@ -74,7 +74,7 @@ export class SharedPreferences extends PureComponent<Props, State> {
     this.service = new PreferencesService(props.resourceUri);
     this.state = {
       isLoading: false,
-      theme: '',
+      theme: 'light',
       timezone: '',
       weekStart: '',
       language: '',
@@ -114,7 +114,7 @@ export class SharedPreferences extends PureComponent<Props, State> {
     this.setState({
       isLoading: false,
       homeDashboardUID: prefs.homeDashboardUID,
-      theme: prefs.theme,
+      theme: prefs.theme || 'light',
       timezone: prefs.timezone,
       weekStart: prefs.weekStart,
       language: prefs.language,
@@ -308,6 +308,8 @@ function getTranslatedThemeName(theme: ThemeRegistryItem) {
       return t('shared.preferences.theme.light-label', 'Light');
     case 'system':
       return t('shared.preferences.theme.system-label', 'System preference');
+      case 'default': // Explicitly handle "default"
+      return t('shared.preferences.theme.default-label', 'Light'); // Display as "Light"
     default:
       return theme.name;
   }
