@@ -39,6 +39,8 @@ export function getAppRoutes(): RouteDescriptor[] {
     //     () => import(/* webpackChunkName: "DashboardPageProxy" */ '../features/dashboard/containers/DashboardPageProxy')
     //   ),
     // },
+ 
+
     {
       path: '/d/:uid/:slug?',
       pageClass: 'page-dashboard',
@@ -553,10 +555,10 @@ export function getAppRoutes(): RouteDescriptor[] {
       path: '/goto/*',
       component: HandleGoToRedirect,
     },
-    {
-      path: '/*',
-      component: PageNotFound,
-    },
+    // {
+    //   path: '/*',
+    //   component: PageNotFound,
+    // },
   ].filter(isTruthy);
 }
 
