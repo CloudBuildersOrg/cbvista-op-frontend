@@ -555,10 +555,10 @@ export function getAppRoutes(): RouteDescriptor[] {
       path: '/goto/*',
       component: HandleGoToRedirect,
     },
-    // {
-    //   path: '/*',
-    //   component: PageNotFound,
-    // },
+    {
+      path: '/*',
+      component: PageNotFound,
+    },
   ].filter(isTruthy);
 }
 
