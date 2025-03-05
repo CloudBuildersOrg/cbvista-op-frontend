@@ -4,7 +4,7 @@ import { Breadcrumbs } from './Breadcrumbs';
 import { Breadcrumb } from './types';
 
 const mockBreadcrumbs: Breadcrumb[] = [
-  { text: 'Home', href: '/dashboard' },
+  { text: 'Home', href: '/home' },
   { text: 'First', href: '/first' },
   { text: 'Second', href: '/second' },
 ];
@@ -24,12 +24,9 @@ describe('Breadcrumbs', () => {
     const nav = screen.getByRole('navigation');
     const links = within(nav).getAllByRole('link');
     expect(links.length).toEqual(2);
-    // const homeLink = within(nav).getByRole('link', { name: 'Home' });
-    // expect(homeLink).toBeInTheDocument();
-    // expect(homeLink).toHaveAttribute('href', '/home');
-    const dashboardLink = within(nav).getByRole('link', { name: 'Dashboard' });
-  expect(dashboardLink).toBeInTheDocument();
-  expect(dashboardLink).toHaveAttribute('href', '/dashboard');
+    const homeLink = within(nav).getByRole('link', { name: 'Home' });
+    expect(homeLink).toBeInTheDocument();
+    expect(homeLink).toHaveAttribute('href', '/home');
     const firstLink = within(nav).getByRole('link', { name: 'First' });
     expect(firstLink).toBeInTheDocument();
     expect(firstLink).toHaveAttribute('href', '/first');
