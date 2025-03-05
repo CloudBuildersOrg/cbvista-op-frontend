@@ -43,8 +43,9 @@ export const MegaMenu = memo(
       .filter((item) => 
         item.id !== 'profile' && 
         item.id !== 'help' && 
-        item.id !== 'Home' && // Already filtered, kept for clarity
+        item.id !== 'home' && // Already filtered, kept for clarity
         item.id !== 'bookmarks' && // Add this to remove "Bookmarks"
+        item.id !== 'starred' &&
         item.text !== 'Section name'
       )
       .map((item) => enrichWithInteractionTracking(item, state.megaMenuDocked));

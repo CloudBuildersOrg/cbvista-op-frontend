@@ -73,7 +73,7 @@ export class SharedPreferences extends PureComponent<Props, State> {
     this.service = new PreferencesService(props.resourceUri);
     this.state = {
       isLoading: false,
-      theme: 'light', // Default to light
+      theme: 'light', // Default to light for all cases
       timezone: '',
       weekStart: '',
       language: '',
@@ -102,18 +102,54 @@ export class SharedPreferences extends PureComponent<Props, State> {
 
   async componentDidMount() {
     this.setState({ isLoading: true });
-    const prefs = await this.service.load();
-    this.setState({
-      isLoading: false,
-      homeDashboardUID: prefs.homeDashboardUID,
-      theme: prefs.theme || 'light', // Load saved theme or default to light
-      timezone: prefs.timezone,
-      weekStart: prefs.weekStart,
-      language: prefs.language,
-      queryHistory: prefs.queryHistory,
-      navbar: prefs.navbar,
-    });
-    changeTheme(prefs.theme || 'light', true); // Apply initial theme
+    try {
+      const prefs = await this.service.load();
+      const themeToApply = prefs.theme && prefs.theme.trim() !== '' ? prefs.theme : 'light';
+      this.setState({
+        isLoading: false,
+        homeDashboardUID: prefs.homeDashboardUID,
+        theme: themeToApply,
+        timezone: prefs.timezone,
+        weekStart: prefs.weekStart,
+        language: prefs.language,
+        queryHistory: prefs.queryHistory,
+        navbar: prefs.navbar,
+      });
+      changeTheme(themeToApply, true);
+    } catch (error) {
+      this.setState({ isLoading: false, theme: 'light' });
+      changeTheme('light', true);
+    }
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.resourceUri !== this.props.resourceUri) {
+      this.setState({ theme: 'light', isLoading: true });
+      changeTheme('light', true);
+      this.service = new PreferencesService(this.props.resourceUri);
+      this.loadPreferences();
+    }
+  }
+
+  async loadPreferences() {
+    try {
+      const prefs = await this.service.load();
+      const themeToApply = prefs.theme && prefs.theme.trim() !== '' ? prefs.theme : 'light';
+      this.setState({
+        isLoading: false,
+        homeDashboardUID: prefs.homeDashboardUID,
+        theme: themeToApply,
+        timezone: prefs.timezone,
+        weekStart: prefs.weekStart,
+        language: prefs.language,
+        queryHistory: prefs.queryHistory,
+        navbar: prefs.navbar,
+      });
+      changeTheme(themeToApply, true);
+    } catch (error) {
+      this.setState({ isLoading: false, theme: 'light' });
+      changeTheme('light', true);
+    }
   }
 
   onSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -122,25 +158,28 @@ export class SharedPreferences extends PureComponent<Props, State> {
 
     if (confirmationResult) {
       const { homeDashboardUID, theme, timezone, weekStart, language, queryHistory, navbar } = this.state;
-      await this.service.update({ homeDashboardUID, theme, timezone, weekStart, language, queryHistory, navbar });
+      const themeToSave = theme && theme.trim() !== '' ? theme : 'light';
+      await this.service.update({ 
+        homeDashboardUID, 
+        theme: themeToSave, 
+        timezone, 
+        weekStart, 
+        language, 
+        queryHistory, 
+        navbar 
+      });
       window.location.reload();
     }
   };
 
   onThemeChanged = (value: ComboboxOption<string>) => {
-    // Temporarily reset to light theme when the user attempts to change it
-    changeTheme('light', true); // Immediate reset to light
-    setTimeout(() => {
-      // After a brief moment, apply the user's chosen theme
-      this.setState({ theme: value.value });
-      if (value.value) {
-        changeTheme(value.value, true);
-      }
-      reportInteraction('grafana_preferences_theme_changed', {
-        toTheme: value.value,
-        preferenceType: this.props.preferenceType,
-      });
-    }, 500); // Delay of 500ms to show the light theme briefly
+    const newTheme = value.value || 'light';
+    this.setState({ theme: newTheme });
+    changeTheme(newTheme, true);
+    reportInteraction('grafana_preferences_theme_changed', {
+      toTheme: newTheme,
+      preferenceType: this.props.preferenceType,
+    });
   };
 
   onTimeZoneChanged = (timezone?: string) => {
@@ -301,11 +340,10 @@ function getTranslatedThemeName(theme: ThemeRegistryItem) {
     case 'dark':
       return t('shared.preferences.theme.dark-label', 'Dark');
     case 'light':
+    case 'default':
       return t('shared.preferences.theme.light-label', 'Light');
     case 'system':
       return t('shared.preferences.theme.system-label', 'System preference');
-    case 'default':
-      return t('shared.preferences.theme.default-label', 'Light'); // Display as "Light"
     default:
       return theme.name;
   }
