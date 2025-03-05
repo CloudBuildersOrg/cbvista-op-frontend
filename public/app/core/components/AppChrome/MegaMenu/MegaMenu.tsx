@@ -39,8 +39,16 @@ export const MegaMenu = memo(
 
     // Remove profile + help from tree
     const navItems = navTree
-      .filter((item) => item.id !== 'profile' && item.id !== 'help' && item.id !=='Home')
+
+      .filter((item) => 
+        item.id !== 'profile' && 
+        item.id !== 'help' && 
+        item.id !== 'Home' && // Already filtered, kept for clarity
+        item.id !== 'bookmarks' && // Add this to remove "Bookmarks"
+        item.text !== 'Section name'
+      )
       .map((item) => enrichWithInteractionTracking(item, state.megaMenuDocked));
+      console.log ('Filtered navItems:', navItems.map(item=> item.id))
 
     if (config.featureToggles.pinNavItems) {
       const bookmarksItem = findByUrl(navItems, '/bookmarks');
