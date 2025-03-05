@@ -26,6 +26,7 @@ import { t, Trans } from 'app/core/internationalization';
 import { LANGUAGES, PSEUDO_LOCALE } from 'app/core/internationalization/constants';
 import { PreferencesService } from 'app/core/services/PreferencesService';
 import { changeTheme } from 'app/core/services/theme';
+
 export interface Props {
   resourceUri: string;
   disabled?: boolean;
@@ -45,11 +46,9 @@ function getLanguageOptions(): ComboboxOption[] {
     if (a.value === PSEUDO_LOCALE) {
       return 1;
     }
-
     if (b.value === PSEUDO_LOCALE) {
       return -1;
     }
-
     return a.label.localeCompare(b.label);
   });
 
@@ -74,7 +73,7 @@ export class SharedPreferences extends PureComponent<Props, State> {
     this.service = new PreferencesService(props.resourceUri);
     this.state = {
       isLoading: false,
-      theme: 'light',
+      theme: 'light', // Default to light
       timezone: '',
       weekStart: '',
       language: '',
@@ -83,11 +82,9 @@ export class SharedPreferences extends PureComponent<Props, State> {
     };
 
     const allowedExtraThemes = [];
-
     if (config.featureToggles.extraThemes) {
       allowedExtraThemes.push('debug');
     }
-
     if (config.featureToggles.grafanaconThemes) {
       allowedExtraThemes.push('desertbloom');
       allowedExtraThemes.push('gildedgrove');
@@ -100,27 +97,23 @@ export class SharedPreferences extends PureComponent<Props, State> {
       value: theme.id,
       label: getTranslatedThemeName(theme),
     }));
-
-    // Add default option
     this.themeOptions.unshift({ value: '', label: t('shared-preferences.theme.default-label', 'Default') });
   }
 
   async componentDidMount() {
-    this.setState({
-      isLoading: true,
-    });
+    this.setState({ isLoading: true });
     const prefs = await this.service.load();
-
     this.setState({
       isLoading: false,
       homeDashboardUID: prefs.homeDashboardUID,
-      theme: prefs.theme || 'light',
+      theme: prefs.theme || 'light', // Load saved theme or default to light
       timezone: prefs.timezone,
       weekStart: prefs.weekStart,
       language: prefs.language,
       queryHistory: prefs.queryHistory,
       navbar: prefs.navbar,
     });
+    changeTheme(prefs.theme || 'light', true); // Apply initial theme
   }
 
   onSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -135,15 +128,19 @@ export class SharedPreferences extends PureComponent<Props, State> {
   };
 
   onThemeChanged = (value: ComboboxOption<string>) => {
-    this.setState({ theme: value.value });
-    reportInteraction('grafana_preferences_theme_changed', {
-      toTheme: value.value,
-      preferenceType: this.props.preferenceType,
-    });
-
-    if (value.value) {
-      changeTheme(value.value, true);
-    }
+    // Temporarily reset to light theme when the user attempts to change it
+    changeTheme('light', true); // Immediate reset to light
+    setTimeout(() => {
+      // After a brief moment, apply the user's chosen theme
+      this.setState({ theme: value.value });
+      if (value.value) {
+        changeTheme(value.value, true);
+      }
+      reportInteraction('grafana_preferences_theme_changed', {
+        toTheme: value.value,
+        preferenceType: this.props.preferenceType,
+      });
+    }, 500); // Delay of 500ms to show the light theme briefly
   };
 
   onTimeZoneChanged = (timezone?: string) => {
@@ -163,7 +160,6 @@ export class SharedPreferences extends PureComponent<Props, State> {
 
   onLanguageChanged = (language: string) => {
     this.setState({ language });
-
     reportInteraction('grafana_preferences_language_changed', {
       toLanguage: language,
       preferenceType: this.props.preferenceType,
@@ -308,7 +304,7 @@ function getTranslatedThemeName(theme: ThemeRegistryItem) {
       return t('shared.preferences.theme.light-label', 'Light');
     case 'system':
       return t('shared.preferences.theme.system-label', 'System preference');
-      case 'default': // Explicitly handle "default"
+    case 'default':
       return t('shared.preferences.theme.default-label', 'Light'); // Display as "Light"
     default:
       return theme.name;
