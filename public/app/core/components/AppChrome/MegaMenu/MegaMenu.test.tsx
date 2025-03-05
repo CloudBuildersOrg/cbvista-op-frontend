@@ -29,7 +29,19 @@ const setup = () => {
       id: 'profile',
       url: 'profile',
     },
+    {
+      text: 'Home',
+      id: 'Home',
+      url: '/home',
+    },
+    {
+      text: 'Bookmarks',
+      id: 'bookmarks',
+      url: '/bookmarks',
+    },
   ];
+
+  
 
   const store = configureStore({ navBarTree });
   return render(<MegaMenu onClose={() => {}} />, { store });
@@ -39,10 +51,12 @@ describe('MegaMenu', () => {
   afterEach(() => {
     window.localStorage.clear();
   });
-  it('should render component', async () => {
+  it('should render component without Home and Bookmarks', async () => {
     setup();
 
     expect(await screen.findByTestId(selectors.components.NavMenu.Menu)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Home' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Bookmarks' })).not.toBeInTheDocument()
     expect(await screen.findByRole('link', { name: 'Section name' })).toBeInTheDocument();
   });
 
