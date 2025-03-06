@@ -32,15 +32,20 @@ export function getAppRoutes(): RouteDescriptor[] {
     // Based on the Grafana configuration standalone plugin pages can even override and extend existing core pages, or they can register new routes under existing ones.
     // In order to make it possible we need to register them first due to how `<Switch>` is evaluating routes. (This will be unnecessary once/when we upgrade to React Router v6 and start using `<Routes>` instead.)
     ...getAppPluginRoutes(),
+    // {
+    //   path: '/',
+    //   pageClass: 'page-dashboard',
+    //   routeName: DashboardRoutes.Home,
+    //   component: SafeDynamicImport(
+    //     () => import(/* webpackChunkName: "DashboardPageProxy" */ '../features/dashboard/containers/DashboardPageProxy')
+    //   ),
+    // },
+ 
     {
       path: '/',
-      pageClass: 'page-dashboard',
-      routeName: DashboardRoutes.Home,
-      component: SafeDynamicImport(
-        () => import(/* webpackChunkName: "DashboardPageProxy" */ '../features/dashboard/containers/DashboardPageProxy')
-      ),
+      routeName: DashboardRoutes.Normal, // Changed from DashboardRoutes.Home
+      component: () => <Navigate replace to="/dashboards" />, // Redirects to dashboard list
     },
- 
 
     {
       path: '/d/:uid/:slug?',
