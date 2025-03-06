@@ -181,10 +181,10 @@ describe('DashboardPageProxy', () => {
 
     describe('when user can only view a dashboard ', () => {
       it('should render DashboardScenePage if route is Home', async () => {
-        getDashboardScenePageStateManager().setDashboardCache(HOME_DASHBOARD_CACHE_KEY, homeMock);
+        getDashboardScenePageStateManager().setDashboardCache('uid', dashMock); // Mock a dashboard
         act(() => {
           setup({
-            route: { routeName: DashboardRoutes.Home, component: () => null, path: '/' },
+            route: { routeName: DashboardRoutes.Normal, component: () => null, path: '/' },
             uid: '',
           });
         });
