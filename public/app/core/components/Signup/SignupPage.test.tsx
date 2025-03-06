@@ -38,7 +38,7 @@ const props = {
 describe('Signup Page', () => {
   it('renders correctly', () => {
     render(<SignupPage {...props} />);
-    expect(screen.getByRole('heading', { name: 'Welcome to CB_Vista' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Welcome to CB Vista' })).toBeInTheDocument();
 
     expect(screen.getByRole('textbox', { name: 'Your name' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Email' })).toBeInTheDocument();
