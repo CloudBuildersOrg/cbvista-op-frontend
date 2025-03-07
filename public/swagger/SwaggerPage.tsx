@@ -14,8 +14,8 @@ export const Page = () => {
   const theme = createTheme({ colors: { mode: 'light' } });
   const [url, setURL] = useState<SelectableValue<string>>();
   const urls = useAsync(async () => {
-    const v2 = { label: 'Grafana API (OpenAPI v2)', key: 'openapi2', value: 'public/api-merged.json' };
-    const v3 = { label: 'Grafana API (OpenAPI v3)', key: 'openapi3', value: 'public/openapi3.json' };
+    const v2 = { label: 'CB Vista API (OpenAPI v2)', key: 'openapi2', value: 'public/api-merged.json' };
+    const v3 = { label: 'CB Vista API (OpenAPI v3)', key: 'openapi3', value: 'public/openapi3.json' };
     const urls: Array<SelectableValue<string>> = [v2, v3];
 
     const rsp = await fetch('openapi/v3');
@@ -83,7 +83,7 @@ export const Page = () => {
         <NamespaceContext.Provider value={namespace.value}>
           <div style={{ backgroundColor: '#000', padding: '10px' }}>
             <Stack justifyContent={'space-between'}>
-              <img height="40" src="public/img/grafana_icon.svg" alt="Grafana" />
+              <img height="40" src="public/img/grafana_icon.svg" alt="CB Vista" />
               <Select
                 options={urls.value}
                 isClearable={false /* TODO -- when we allow a landing page, this can be true */}
