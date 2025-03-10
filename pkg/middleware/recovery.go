@@ -150,7 +150,7 @@ func Recovery(cfg *setting.Cfg, license licensing.Licensing) web.Middleware {
 						ThemeType string
 						ErrorMsg  string
 						Assets    *dtos.EntryPointAssets
-					}{"Server Error", "Grafana", cfg.AppSubURL, cfg.DefaultTheme, "", assets}
+					}{"Server Error", "CB Vista", cfg.AppSubURL, cfg.DefaultTheme, "", assets}
 
 					if cfg.Env == setting.Dev {
 						if err, ok := r.(error); ok {
