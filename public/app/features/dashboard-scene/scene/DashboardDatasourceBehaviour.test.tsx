@@ -25,14 +25,14 @@ import { DefaultGridLayoutManager } from './layout-default/DefaultGridLayoutMana
 
 const grafanaDs = {
   id: 1,
-  uid: '-- Grafana --',
+  uid: '-- CB Vista --',
   name: 'grafana',
   type: 'grafana',
   meta: {
     id: 'grafana',
   },
   getRef: () => {
-    return { type: 'grafana', uid: '-- Grafana --' };
+    return { type: 'grafana', uid: '-- CB Vista --' };
   },
 };
 
