@@ -52,7 +52,7 @@ const noAnnotationsDsInstanceSettings = {
 
 const grafanaDsInstanceSettings = {
   name: 'Grafana',
-  uid: '-- Grafana --',
+  uid: '-- CB Vista --',
   meta: {
     annotations: true,
   } as DataSourcePluginMeta,
@@ -69,7 +69,7 @@ jest.mock('@grafana/runtime', () => ({
         if (!ref) {
           return new MockDataSourceApi(noAnnotationsDsInstanceSettings);
         }
-        if (getDataSourceUID(ref) === '-- Grafana --') {
+        if (getDataSourceUID(ref) === '-- CB Vista --') {
           return new MockDataSourceApi(grafanaDsInstanceSettings);
         }
         return jest.fn().mockResolvedValue({ uid: 'ds1' });
@@ -78,7 +78,7 @@ jest.mock('@grafana/runtime', () => ({
         if (getDataSourceUID(ref) === 'noAnnotationsDs') {
           return Promise.resolve(new MockDataSourceApi(noAnnotationsDsInstanceSettings));
         }
-        if (getDataSourceUID(ref) === '-- Grafana --') {
+        if (getDataSourceUID(ref) === '-- CB Vista--') {
           return Promise.resolve(new MockDataSourceApi(grafanaDsInstanceSettings));
         }
         return Promise.resolve(new MockDataSourceApi('ds1'));
@@ -212,7 +212,7 @@ async function buildTestScene() {
             name: 'test',
             datasource: {
               type: 'grafana',
-              uid: '-- Grafana --',
+              uid: '-- CB Vista --',
             },
           },
           name: 'test',
