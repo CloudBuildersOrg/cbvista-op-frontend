@@ -76,14 +76,14 @@ function getTranslatedMessage(snapshot: GetSnapshotResponseDto) {
   if (distinctItems > SUCCESS_MESSAGE_ITEM_TYPES_THRESHOLD) {
     return t(
       'migrate-to-cloud.onprem.success-message-generic',
-      'Successfully migrated {{successCount}} resources to your Grafana Cloud instance.',
+      'Successfully migrated {{successCount}} resources to your CB Vista Cloud instance.',
       { successCount }
     );
   }
 
   return t(
     'migrate-to-cloud.onprem.success-message',
-    'Successfully migrated {{successCount}} {{types, list}} to your Grafana Cloud instance.',
+    'Successfully migrated {{successCount}} {{types, list}} to your CB Vista Cloud instance.',
     { successCount, types }
   );
 }
