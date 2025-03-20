@@ -64,11 +64,19 @@ spec:
               value: "true"
 
             # OAuth Authentication Configuration
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+            - name: GF_USERS_AUTO_ASSIGN_ORG
+              value: "true"
+            - name: GF_USERS_AUTO_ASSIGN_ORG_ROLE
+              value: "Admin"
+            - name: GF_AUTH_DISABLE_LOGIN_FORM
+              value: "true"
             - name: GF_AUTH_GENERIC_OAUTH_ENABLED
               value: "true"
             - name: GF_AUTH_GENERIC_OAUTH_NAME
               value: "OAuth"
-            - name: GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN
+            - name: GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP
               value: "true"
             - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
               value: "tt4HINqCRHbQMxVnAAYimGbuzH96c5lH"
