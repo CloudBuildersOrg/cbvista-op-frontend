@@ -1,6 +1,7 @@
 package authz
 
 import (
+	"fmt"
 	"context"
 
 	"github.com/grafana/authlib/authn"
