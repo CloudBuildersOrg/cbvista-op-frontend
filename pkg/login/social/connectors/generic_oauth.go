@@ -508,6 +508,30 @@ func (s *SocialGenericOAuth) extractGroups(data *UserInfoJson) ([]string, error)
 
 	return util.SearchJSONForStringSliceAttr(s.groupsAttributePath, data.rawJSON)
 }
+func (s *SocialGenericOAuth) extractOrgs(rawJSON []byte) ([]string, error) {
+	orgIdPath := s.info.OrgAttributePath // ✅ This comes from config
+
+	if orgIdPath == "" {
+		s.log.Info("No Organization Attribute Path configured")
+		return []string{}, nil
+	}
+
+	s.log.Info("Trying to extract organization ID", "path", orgIdPath)
+
+	orgID, err := util.SearchJSONForStringAttr(orgIdPath, rawJSON)
+	if err != nil {
+		s.log.Warn("Failed to extract organization ID from token", "path", orgIdPath, "err", err)
+		return nil, err
+	}
+
+	if orgID == "" {
+		s.log.Info("No organization ID found in token", "path", orgIdPath)
+		return []string{}, nil
+	}
+
+	s.log.Info("Extracted organization ID from token", "path", orgIdPath, "org_id", orgID)
+	return []string{orgID}, nil
+}
 
 func (s *SocialGenericOAuth) fetchPrivateEmail(ctx context.Context, client *http.Client) (string, error) {
 	type Record struct {
