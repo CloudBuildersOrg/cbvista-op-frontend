@@ -61,11 +61,26 @@ func (m *OrgRoleMapper) MapOrgRoles(
 	externalOrgs []string,
 	directlyMappedRole org.RoleType,
 ) map[int64]org.RoleType {
-	if len(mappingCfg.orgMapping) == 0 {
-		// Org mapping is not configured
-		return m.getDefaultOrgMapping(mappingCfg.strictRoleMapping, directlyMappedRole)
+	// if len(mappingCfg.orgMapping) == 0 {
+	// 	// Org mapping is not configured
+	// 	return m.getDefaultOrgMapping(mappingCfg.strictRoleMapping, directlyMappedRole)
+	// }
+	if len(externalOrgs) > 0 {
+		// Dynamically assign based on org IDs passed from token (even without static mapping)
+		userOrgRoles := map[int64]org.RoleType{}
+	
+		for _, orgStr := range externalOrgs {
+			orgID, err := strconv.ParseInt(orgStr, 10, 64)
+			if err != nil {
+				m.logger.Warn("Invalid org ID in externalOrgs", "orgStr", orgStr, "error", err)
+				continue
+			}
+			// Use directlyMappedRole (like Admin from token)
+			userOrgRoles[orgID] = directlyMappedRole
+			m.logger.Info("Dynamically assigned user to org", "orgID", orgID, "role", directlyMappedRole)
+		}
+		return userOrgRoles
 	}
-
 	userOrgRoles := getMappedOrgRoles(externalOrgs, mappingCfg.orgMapping)
 
 	if err := m.handleGlobalOrgMapping(userOrgRoles); err != nil {
