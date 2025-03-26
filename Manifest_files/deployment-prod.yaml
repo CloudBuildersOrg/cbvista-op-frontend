@@ -90,16 +90,16 @@ spec:
             
         
           volumeMounts:
-          - name: grafana-storage
-            mountPath: /var/lib/grafana
-          - name: rds-ca-cert
-            mountPath: "/etc/ssl/certs/rds-ca.pem"
-            subPath: rds-ca.pem
-            readOnly: true
-             
-          volumes:
-          - name: grafana-storage
-            emptyDir: {}
-          - name: rds-ca-cert
-            secret:
-              secretName: rds-ca-cert
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+            - name: rds-ca-cert
+              mountPath: "/etc/ssl/certs/rds-ca.pem"
+              subPath: rds-ca.pem
+              readOnly: true
+
+      volumes:
+        - name: grafana-storage
+          emptyDir: {}
+        - name: rds-ca-cert
+          secret:
+            secretName: rds-ca-cert
