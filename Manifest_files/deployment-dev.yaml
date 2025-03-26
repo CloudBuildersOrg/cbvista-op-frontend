@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-frontend
+  namespace: DEPLOY_NAMESPACE
+  labels:
+    app: grafana-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-frontend
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+  template:
+    metadata:
+      labels:
+        app: grafana-frontend
+    spec:
+      containers:
+        - name: grafana
+          image: NEW_ECR_IMAGE  # 🔹 Updated by GitHub Actions
+          ports:
+            - containerPort: 3000
+          
+          env:
+            # Server Configuration
+            - name: GF_SERVER_PROTOCOL
+              value: "http"
+            - name: GF_SERVER_DOMAIN
+              value: "monitoring.dev.cloudbuilders.io"
+            - name: GF_SERVER_ENFORCE_DOMAIN
+              value: "true"
+            - name: GF_SERVER_ROOT_URL
+              value: "https://monitoring.dev.cloudbuilders.io/"
+            - name: GF_SERVER_HTTP_PORT
+              value: "3000"
+
+            # Database Configuration (GitHub Secrets Replace These at Runtime)
+            - name: GF_DATABASE_TYPE
+              value: "postgres"
+            - name: GF_DATABASE_HOST
+              value: "dbm-grafana-testing1.cvkq6g0kgkne.us-east-1.rds.amazonaws.com:5432"
+            - name: GF_DATABASE_NAME
+              value: "grafana-dev"
+            - name: GF_DATABASE_USER
+              value: "postgres"
+            - name: GF_DATABASE_PASSWORD
+              value: "Postgres123" # Directly provided password without a secret
+            - name: GF_DATABASE_SSL_MODE
+              value: "verify-full" # SSL is disabled since no certificate is used
+            - name: GF_DATABASE_CA_CERT_PATH
+              value: "/etc/ssl/certs/rds-ca.pem"
+
+            # Plugin & TLS Configurations
+            - name: GF_PLUGIN_TLS_SKIP_VERIFY
+              value: "true"
+            - name: GF_HTTP_TLS_SKIP_VERIFY
+              value: "true"
+
+          volumeMounts:
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+            - name: rds-ca-cert
+              mountPath: "/etc/ssl/certs/rds-ca.pem"
+              subPath: rds-ca.pem
+              readOnly: true
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1024Mi"
+
+      volumes:
+        - name: grafana-storage
+          emptyDir: {}
+        - name: rds-ca-cert
+          secret:
+            secretName: rds-ca-cert

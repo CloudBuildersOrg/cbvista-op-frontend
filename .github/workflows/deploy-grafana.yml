@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - sandbox
+      #- sandbox
       - main
   workflow_dispatch:
 
@@ -14,48 +14,48 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-      EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Determine Namespace Based on Branch
+      - name: Set Environment Variables
         run: |
           case "${{ github.ref_name }}" in
             "develop")
               echo "DEPLOY_NAMESPACE=monitoring" >> $GITHUB_ENV
-              ;;
-            "sandbox")
-              echo "DEPLOY_NAMESPACE=sandbox" >> $GITHUB_ENV
+              echo "AWS_REGION=${{ secrets.DEV_AWS_REGION }}" >> $GITHUB_ENV
+              echo "ECR_REPOSITORY=${{ secrets.DEV_ECR_REPOSITORY }}" >> $GITHUB_ENV
+              echo "EKS_CLUSTER_NAME=${{ secrets.DEV_EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
+              echo "AWS_ACCOUNT_ID=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
+              echo "AWS_ROLE_TO_ASSUME=${{ secrets.DEV_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
+              echo "DEPLOYMENT_FILE=deployment-dev.yaml" >> $GITHUB_ENV
               ;;
             "main")
-              echo "DEPLOY_NAMESPACE=prod" >> $GITHUB_ENV
+              echo "DEPLOY_NAMESPACE=vista-prod" >> $GITHUB_ENV
+              echo "AWS_REGION=${{ secrets.PROD_AWS_REGION }}" >> $GITHUB_ENV
+              echo "ECR_REPOSITORY=${{ secrets.PROD_ECR_REPOSITORY }}" >> $GITHUB_ENV
+              echo "EKS_CLUSTER_NAME=${{ secrets.PROD_EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
+              echo "AWS_ACCOUNT_ID=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
+              echo "AWS_ROLE_TO_ASSUME=${{ secrets.PROD_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
+              echo "DEPLOYMENT_FILE=deployment-prod.yaml" >> $GITHUB_ENV
               ;;
             *)
-              echo "Invalid branch for deployment: ${{ github.ref_name }}"
+              echo "Invalid branch: ${{ github.ref_name }}"
               exit 1
               ;;
           esac
 
-      - name: Configure AWS Credentials (IAM Role)
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
-          retry-max-attempts: 3
 
-       # Install kubectl
       - name: Install kubectl
         uses: azure/setup-kubectl@v2.0
-        with: 
+        with:
           version: 'v1.24.0'
-        id: instal
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -67,7 +67,7 @@ jobs:
         run: |
           IMAGE_TAG=$(git rev-parse --short HEAD)
           IMAGE_URI="${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}"
-
+          
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
           echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
 
@@ -77,40 +77,24 @@ jobs:
           docker tag custom-grafana "$IMAGE_URI"
           docker push "$IMAGE_URI"
 
-          echo "Successfully pushed $IMAGE_URI"
-
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
 
-      - name: Verify Kubernetes Authentication
-        run: |
-          kubectl config view
-          kubectl get nodes
-          kubectl cluster-info
-          
-      - name: Ensure Namespace Exists in Kubernetes
+      - name: Ensure Namespace Exists
         run: |
           kubectl get namespace ${{ env.DEPLOY_NAMESPACE }} || kubectl create namespace ${{ env.DEPLOY_NAMESPACE }}
 
-      - name: Update Kubernetes Deployment YAML with Latest Image
+      - name: Update Kubernetes Manifests
         run: |
-          sed -i "s|NEW_ECR_IMAGE|${{ env.IMAGE_URI }}|g" Manifest_files/deployment.yaml
-          sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/deployment.yaml
+          sed -i "s|NEW_ECR_IMAGE|${{ env.IMAGE_URI }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
           sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/service.yaml
-          
-      - name: Inject GitHub Secrets into Deployment File
-        run: |
-          sed -i "s|GF_DATABASE_HOST_VALUE|${{ secrets.GF_DATABASE_HOST }}|g" Manifest_files/deployment.yaml
-          sed -i "s|GF_DATABASE_NAME_VALUE|${{ secrets.GF_DATABASE_NAME }}|g" Manifest_files/deployment.yaml
-          sed -i "s|GF_DATABASE_USER_VALUE|${{ secrets.GF_DATABASE_USER }}|g" Manifest_files/deployment.yaml
-          sed -i "s|GF_DATABASE_PASSWORD_VALUE|${{ secrets.GF_DATABASE_PASSWORD }}|g" Manifest_files/deployment.yaml
-
+  
       - name: Deploy to EKS
         run: |
-          kubectl apply -f Manifest_files/deployment.yaml
+          kubectl apply -f Manifest_files/${{ env.DEPLOYMENT_FILE }}
           kubectl apply -f Manifest_files/service.yaml
-          echo "Deployment applied to ${{ env.DEPLOY_NAMESPACE }}"
 
       - name: Verify Deployment
         run: |
