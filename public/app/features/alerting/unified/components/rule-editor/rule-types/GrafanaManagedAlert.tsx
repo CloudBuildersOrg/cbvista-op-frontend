@@ -5,7 +5,7 @@ import { RuleType, SharedProps } from './RuleType';
 const GrafanaManagedRuleType = ({ selected = false, disabled, onClick }: SharedProps) => {
   return (
     <RuleType
-      name="Grafana managed alert"
+      name="CB Vista managed alert"
       description={
         <span>
           Supports multiple data sources of any kind.

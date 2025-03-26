@@ -26,6 +26,7 @@ import { t, Trans } from 'app/core/internationalization';
 import { LANGUAGES, PSEUDO_LOCALE } from 'app/core/internationalization/constants';
 import { PreferencesService } from 'app/core/services/PreferencesService';
 import { changeTheme } from 'app/core/services/theme';
+
 export interface Props {
   resourceUri: string;
   disabled?: boolean;
@@ -45,11 +46,9 @@ function getLanguageOptions(): ComboboxOption[] {
     if (a.value === PSEUDO_LOCALE) {
       return 1;
     }
-
     if (b.value === PSEUDO_LOCALE) {
       return -1;
     }
-
     return a.label.localeCompare(b.label);
   });
 
@@ -74,7 +73,7 @@ export class SharedPreferences extends PureComponent<Props, State> {
     this.service = new PreferencesService(props.resourceUri);
     this.state = {
       isLoading: false,
-      theme: '',
+      theme: 'light', // Default to light for all cases
       timezone: '',
       weekStart: '',
       language: '',
@@ -83,11 +82,9 @@ export class SharedPreferences extends PureComponent<Props, State> {
     };
 
     const allowedExtraThemes = [];
-
     if (config.featureToggles.extraThemes) {
       allowedExtraThemes.push('debug');
     }
-
     if (config.featureToggles.grafanaconThemes) {
       allowedExtraThemes.push('desertbloom');
       allowedExtraThemes.push('gildedgrove');
@@ -100,27 +97,59 @@ export class SharedPreferences extends PureComponent<Props, State> {
       value: theme.id,
       label: getTranslatedThemeName(theme),
     }));
-
-    // Add default option
     this.themeOptions.unshift({ value: '', label: t('shared-preferences.theme.default-label', 'Default') });
   }
 
   async componentDidMount() {
-    this.setState({
-      isLoading: true,
-    });
-    const prefs = await this.service.load();
+    this.setState({ isLoading: true });
+    try {
+      const prefs = await this.service.load();
+      const themeToApply = prefs.theme && prefs.theme.trim() !== '' ? prefs.theme : 'light';
+      this.setState({
+        isLoading: false,
+        homeDashboardUID: prefs.homeDashboardUID,
+        theme: themeToApply,
+        timezone: prefs.timezone,
+        weekStart: prefs.weekStart,
+        language: prefs.language,
+        queryHistory: prefs.queryHistory,
+        navbar: prefs.navbar,
+      });
+      changeTheme(themeToApply, true);
+    } catch (error) {
+      this.setState({ isLoading: false, theme: 'light' });
+      changeTheme('light', true);
+    }
+  }
 
-    this.setState({
-      isLoading: false,
-      homeDashboardUID: prefs.homeDashboardUID,
-      theme: prefs.theme,
-      timezone: prefs.timezone,
-      weekStart: prefs.weekStart,
-      language: prefs.language,
-      queryHistory: prefs.queryHistory,
-      navbar: prefs.navbar,
-    });
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.resourceUri !== this.props.resourceUri) {
+      this.setState({ theme: 'light', isLoading: true });
+      changeTheme('light', true);
+      this.service = new PreferencesService(this.props.resourceUri);
+      this.loadPreferences();
+    }
+  }
+
+  async loadPreferences() {
+    try {
+      const prefs = await this.service.load();
+      const themeToApply = prefs.theme && prefs.theme.trim() !== '' ? prefs.theme : 'light';
+      this.setState({
+        isLoading: false,
+        homeDashboardUID: prefs.homeDashboardUID,
+        theme: themeToApply,
+        timezone: prefs.timezone,
+        weekStart: prefs.weekStart,
+        language: prefs.language,
+        queryHistory: prefs.queryHistory,
+        navbar: prefs.navbar,
+      });
+      changeTheme(themeToApply, true);
+    } catch (error) {
+      this.setState({ isLoading: false, theme: 'light' });
+      changeTheme('light', true);
+    }
   }
 
   onSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -129,21 +158,28 @@ export class SharedPreferences extends PureComponent<Props, State> {
 
     if (confirmationResult) {
       const { homeDashboardUID, theme, timezone, weekStart, language, queryHistory, navbar } = this.state;
-      await this.service.update({ homeDashboardUID, theme, timezone, weekStart, language, queryHistory, navbar });
+      const themeToSave = theme && theme.trim() !== '' ? theme : 'light';
+      await this.service.update({ 
+        homeDashboardUID, 
+        theme: themeToSave, 
+        timezone, 
+        weekStart, 
+        language, 
+        queryHistory, 
+        navbar 
+      });
       window.location.reload();
     }
   };
 
   onThemeChanged = (value: ComboboxOption<string>) => {
-    this.setState({ theme: value.value });
+    const newTheme = value.value || 'light';
+    this.setState({ theme: newTheme });
+    changeTheme(newTheme, true);
     reportInteraction('grafana_preferences_theme_changed', {
-      toTheme: value.value,
+      toTheme: newTheme,
       preferenceType: this.props.preferenceType,
     });
-
-    if (value.value) {
-      changeTheme(value.value, true);
-    }
   };
 
   onTimeZoneChanged = (timezone?: string) => {
@@ -163,7 +199,6 @@ export class SharedPreferences extends PureComponent<Props, State> {
 
   onLanguageChanged = (language: string) => {
     this.setState({ language });
-
     reportInteraction('grafana_preferences_language_changed', {
       toLanguage: language,
       preferenceType: this.props.preferenceType,
@@ -305,6 +340,7 @@ function getTranslatedThemeName(theme: ThemeRegistryItem) {
     case 'dark':
       return t('shared.preferences.theme.dark-label', 'Dark');
     case 'light':
+    case 'default':
       return t('shared.preferences.theme.light-label', 'Light');
     case 'system':
       return t('shared.preferences.theme.system-label', 'System preference');

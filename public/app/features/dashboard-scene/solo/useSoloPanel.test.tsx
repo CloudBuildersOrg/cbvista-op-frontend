@@ -14,7 +14,7 @@ jest.mock('@grafana/runtime', () => ({
       // Mocking the build in Grafana data source to avoid annotations data layer errors.
       return {
         id: 1,
-        uid: '-- Grafana --',
+        uid: '-- CB Vista --',
         name: 'grafana',
         type: 'grafana',
         meta: {

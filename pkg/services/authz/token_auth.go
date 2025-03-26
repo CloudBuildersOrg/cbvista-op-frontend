@@ -1,6 +1,7 @@
 package authz
 
 import (
+	"fmt"
 	"context"
 
 	"github.com/grafana/authlib/authn"
@@ -22,6 +23,7 @@ func (t *tokenAuth) GetRequestMetadata(ctx context.Context, _ ...string) (map[st
 		Namespace: t.namespace,
 		Audiences: []string{t.audience},
 	})
+	fmt.Println("Token:", token)
 	if err != nil {
 		return nil, err
 	}

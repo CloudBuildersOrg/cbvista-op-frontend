@@ -112,7 +112,7 @@ describe('contact points', () => {
   beforeEach(() => {
     setupDataSources(alertManager, mimirDatasource);
   });
-  describe('Contact points with Grafana managed alertmanager', () => {
+  describe('Contact points with CB Vista managed alertmanager', () => {
     beforeEach(() => {
       grantUserPermissions([
         AccessControlAction.AlertingNotificationsRead,

@@ -1,24 +1,24 @@
 # syntax=docker/dockerfile:1
-
+ 
 # to maintain formatting of multiline commands in vscode, add the following to settings.json:
 # "docker.languageserver.formatter.ignoreMultilineInstructions": true
-
+ 
 ARG BASE_IMAGE=alpine:3.21
 ARG JS_IMAGE=node:22-alpine
 ARG JS_PLATFORM=linux/amd64
 ARG GO_IMAGE=golang:1.23.5-alpine
-
+ 
 # Default to building locally
 ARG GO_SRC=go-builder
 ARG JS_SRC=js-builder
-
+ 
 # Javascript build stage
 FROM --platform=${JS_PLATFORM} ${JS_IMAGE} AS js-builder
-
+ 
 ENV NODE_OPTIONS=--max_old_space_size=8000
-
+ 
 WORKDIR /tmp/grafana
-
+ 
 COPY package.json project.json nx.json yarn.lock .yarnrc.yml ./
 COPY .yarn .yarn
 COPY packages packages
@@ -26,27 +26,27 @@ COPY public public
 COPY LICENSE ./
 COPY conf/defaults.ini ./conf/defaults.ini
 COPY e2e e2e
-
+ 
 RUN apk add --no-cache make build-base python3
-
+ 
 RUN yarn install --immutable
-
+ 
 COPY tsconfig.json eslint.config.js .editorconfig .browserslistrc .prettierrc.js ./
 COPY scripts scripts
 COPY emails emails
-
+ 
 ENV NODE_ENV=production
 RUN yarn build
-
+ 
 # Golang build stage
 FROM ${GO_IMAGE} AS go-builder
-
+ 
 ARG COMMIT_SHA=""
 ARG BUILD_BRANCH=""
 ARG GO_BUILD_TAGS="oss"
 ARG WIRE_TAGS="oss"
 ARG BINGO="true"
-
+ 
 RUN if grep -i -q alpine /etc/issue; then \
       apk add --no-cache \
           # This is required to allow building on arm64 due to https://github.com/golang/go/issues/22040
@@ -55,12 +55,12 @@ RUN if grep -i -q alpine /etc/issue; then \
           # Install build dependencies
           gcc g++ make git; \
     fi
-
+ 
 WORKDIR /tmp/grafana
-
+ 
 COPY go.* ./
 COPY .bingo .bingo
-
+ 
 # Include vendored dependencies
 COPY pkg/util/xorm pkg/util/xorm
 COPY pkg/apiserver pkg/apiserver
@@ -80,13 +80,11 @@ COPY kindsv2 kindsv2
 COPY apps/alerting/notifications apps/alerting/notifications
 COPY pkg/codegen pkg/codegen
 COPY pkg/plugins/codegen pkg/plugins/codegen
-
+ 
 RUN go mod download
-RUN if [[ "$BINGO" = "true" ]]; then \
-      go install github.com/bwplotka/bingo@latest && \
-      bingo get -v; \
-    fi
-
+ 
+RUN if [[ "$BINGO" = "true" ]]; then go install github.com/bwplotka/bingo@latest; fi
+ 
 COPY embed.go Makefile build.go package.json ./
 COPY cue.mod cue.mod
 COPY kinds kinds
@@ -98,37 +96,37 @@ COPY pkg pkg
 COPY scripts scripts
 COPY conf conf
 COPY .github .github
-
+ 
 ENV COMMIT_SHA=${COMMIT_SHA}
 ENV BUILD_BRANCH=${BUILD_BRANCH}
-
+ 
 RUN make build-go GO_BUILD_TAGS=${GO_BUILD_TAGS} WIRE_TAGS=${WIRE_TAGS}
-
+ 
 # From-tarball build stage
 FROM ${BASE_IMAGE} AS tgz-builder
-
+ 
 WORKDIR /tmp/grafana
-
+ 
 ARG GRAFANA_TGZ="grafana-latest.linux-x64-musl.tar.gz"
-
+ 
 COPY ${GRAFANA_TGZ} /tmp/grafana.tar.gz
-
+ 
 # add -v to make tar print every file it extracts
 RUN tar x -z -f /tmp/grafana.tar.gz --strip-components=1
-
+ 
 # helpers for COPY --from
 FROM ${GO_SRC} AS go-src
 FROM ${JS_SRC} AS js-src
-
+ 
 # Final stage
 FROM ${BASE_IMAGE}
-
+ 
 LABEL maintainer="Grafana Labs <hello@grafana.com>"
 LABEL org.opencontainers.image.source="https://github.com/grafana/grafana"
-
+ 
 ARG GF_UID="472"
 ARG GF_GID="0"
-
+ 
 ENV PATH="/usr/share/grafana/bin:$PATH" \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
     GF_PATHS_DATA="/var/lib/grafana" \
@@ -136,9 +134,9 @@ ENV PATH="/usr/share/grafana/bin:$PATH" \
     GF_PATHS_LOGS="/var/log/grafana" \
     GF_PATHS_PLUGINS="/var/lib/grafana/plugins" \
     GF_PATHS_PROVISIONING="/etc/grafana/provisioning"
-
+ 
 WORKDIR $GF_PATHS_HOME
-
+ 
 # Install dependencies
 RUN if grep -i -q alpine /etc/issue; then \
       apk add --no-cache ca-certificates bash curl tzdata musl-utils && \
@@ -152,11 +150,11 @@ RUN if grep -i -q alpine /etc/issue; then \
     else \
       echo 'ERROR: Unsupported base image' && /bin/false; \
     fi
-
+ 
 # glibc support for alpine x86_64 only
 # docker run --rm --env STDOUT=1 sgerrand/glibc-builder 2.40 /usr/glibc-compat > glibc-bin-2.40.tar.gz
 ARG GLIBC_VERSION=2.40
-
+ 
 RUN if grep -i -q alpine /etc/issue && [ `arch` = "x86_64" ]; then \
       wget -qO- "https://dl.grafana.com/glibc/glibc-bin-$GLIBC_VERSION.tar.gz" | tar zxf - -C / \
         usr/glibc-compat/lib/ld-linux-x86-64.so.2 \
@@ -169,9 +167,9 @@ RUN if grep -i -q alpine /etc/issue && [ `arch` = "x86_64" ]; then \
       mkdir /lib64 && \
       ln -s /usr/glibc-compat/lib/ld-linux-x86-64.so.2 /lib64; \
     fi
-
+ 
 COPY --from=go-src /tmp/grafana/conf ./conf
-
+ 
 RUN if [ ! $(getent group "$GF_GID") ]; then \
       if grep -i -q alpine /etc/issue; then \
         addgroup -S -g $GF_GID grafana; \
@@ -199,16 +197,19 @@ RUN if [ ! $(getent group "$GF_GID") ]; then \
     cp conf/ldap.toml /etc/grafana/ldap.toml && \
     chown -R "grafana:$GF_GID_NAME" "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS" "$GF_PATHS_PROVISIONING" && \
     chmod -R 777 "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS" "$GF_PATHS_PROVISIONING"
-
+ 
 COPY --from=go-src /tmp/grafana/bin/grafana* /tmp/grafana/bin/*/grafana* ./bin/
 COPY --from=js-src /tmp/grafana/public ./public
 COPY --from=js-src /tmp/grafana/LICENSE ./
-
+ 
 EXPOSE 3000
-
+ 
 ARG RUN_SH=./packaging/docker/run.sh
-
+ 
 COPY ${RUN_SH} /run.sh
-
+ 
 USER "$GF_UID"
 ENTRYPOINT [ "/run.sh" ]
+ 
+
+ 
