@@ -28,6 +28,8 @@ jobs:
               echo "EKS_CLUSTER_NAME=${{ secrets.DEV_EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
               echo "AWS_ACCOUNT_ID=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
               echo "AWS_ROLE_TO_ASSUME=${{ secrets.DEV_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
+              echo "GF_DATABASE_USER=${{ secrets.DEV_DB_USER }}" >> $GITHUB_ENV
+              echo "GF_DATABASE_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> $GITHUB_ENV
               echo "DEPLOYMENT_FILE=deployment-dev.yaml" >> $GITHUB_ENV
               ;;
             "main")
@@ -37,6 +39,10 @@ jobs:
               echo "EKS_CLUSTER_NAME=${{ secrets.PROD_EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
               echo "AWS_ACCOUNT_ID=${{ secrets.PROD_AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
               echo "AWS_ROLE_TO_ASSUME=${{ secrets.PROD_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
+              echo "GF_DATABASE_USER=${{ secrets.PROD_DB_USER }}" >> $GITHUB_ENV
+              echo "GF_DATABASE_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}" >> $GITHUB_ENV
+              echo "GF_SMTP_USER=${{ secrets.PROD_SMTP_USER }}" >> $GITHUB_ENV
+              echo "GF_SMTP_PASSWORD=${{ secrets.PROD_SMTP_PASSWORD }}" >> $GITHUB_ENV
               echo "DEPLOYMENT_FILE=deployment-prod.yaml" >> $GITHUB_ENV
               ;;
             *)
@@ -67,7 +73,7 @@ jobs:
         run: |
           IMAGE_TAG=$(git rev-parse --short HEAD)
           IMAGE_URI="${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}"
-          
+
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
           echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
 
@@ -90,7 +96,33 @@ jobs:
           sed -i "s|NEW_ECR_IMAGE|${{ env.IMAGE_URI }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
           sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
           sed -i "s|DEPLOY_NAMESPACE|${{ env.DEPLOY_NAMESPACE }}|g" Manifest_files/service.yaml
-  
+      
+      - name: Inject GitHub Secrets into Deployment File
+        run: |
+          sed -i "s|GF_DATABASE_USER_PLACEHOLDER|${{ env.GF_DATABASE_USER }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          sed -i "s|GF_DATABASE_PASSWORD_PLACEHOLDER|${{ env.GF_DATABASE_PASSWORD }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          sed -i "s|GF_SMTP_USER_PLACEHOLDER|${{ env.GF_SMTP_USER }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          sed -i "s|GF_SMTP_PASSWORD_PLACEHOLDER|${{ env.GF_SMTP_PASSWORD }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+
+      - name: Inject GitHub Secrets into Deployment File
+        run: |
+          GF_DB_USER_ESCAPED=$(printf '%s' "${{ env.GF_DATABASE_USER }}" | sed 's/[&/\]/\\&/g')
+          GF_DB_PASS_ESCAPED=$(printf '%s' "${{ env.GF_DATABASE_PASSWORD }}" | sed 's/[&/\]/\\&/g')
+          sed -i "s|GF_DATABASE_USER_PLACEHOLDER|$GF_DB_USER_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          sed -i "s|GF_DATABASE_PASSWORD_PLACEHOLDER|$GF_DB_PASS_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            GF_SMTP_USER_ESCAPED=$(printf '%s' "${{ env.GF_SMTP_USER }}" | sed 's/[&/\]/\\&/g')
+            GF_SMTP_PASS_ESCAPED=$(printf '%s' "${{ env.GF_SMTP_PASSWORD }}" | sed 's/[&/\]/\\&/g')
+            sed -i "s|GF_SMTP_USER_PLACEHOLDER|$GF_SMTP_USER_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+            sed -i "s|GF_SMTP_PASSWORD_PLACEHOLDER|$GF_SMTP_PASS_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+          fi
+          grep -q "${{ env.GF_DATABASE_USER }}" Manifest_files/${{ env.DEPLOYMENT_FILE }} || (echo "Error: GF_DATABASE_USER not replaced" && exit 1)
+          grep -q "${{ env.GF_DATABASE_PASSWORD }}" Manifest_files/${{ env.DEPLOYMENT_FILE }} || (echo "Error: GF_DATABASE_PASSWORD not replaced" && exit 1)
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            grep -q "${{ env.GF_SMTP_USER }}" Manifest_files/${{ env.DEPLOYMENT_FILE }} || (echo "Error: GF_SMTP_USER not replaced" && exit 1)
+            grep -q "${{ env.GF_SMTP_PASSWORD }}" Manifest_files/${{ env.DEPLOYMENT_FILE }} || (echo "Error: GF_SMTP_PASSWORD not replaced" && exit 1)
+          fi
+
       - name: Deploy to EKS
         run: |
           kubectl apply -f Manifest_files/${{ env.DEPLOYMENT_FILE }}
