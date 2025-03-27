@@ -101,20 +101,9 @@ jobs:
         run: |
           sed -i "s|GF_DATABASE_USER_PLACEHOLDER|${{ env.GF_DATABASE_USER }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
           sed -i "s|GF_DATABASE_PASSWORD_PLACEHOLDER|${{ env.GF_DATABASE_PASSWORD }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
-          sed -i "s|GF_SMTP_USER_PLACEHOLDER|${{ env.GF_SMTP_USER }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
-          sed -i "s|GF_SMTP_PASSWORD_PLACEHOLDER|${{ env.GF_SMTP_PASSWORD }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
-
-      - name: Inject GitHub Secrets into Deployment File
-        run: |
-          GF_DB_USER_ESCAPED=$(printf '%s' "${{ env.GF_DATABASE_USER }}" | sed 's/[&/\]/\\&/g')
-          GF_DB_PASS_ESCAPED=$(printf '%s' "${{ env.GF_DATABASE_PASSWORD }}" | sed 's/[&/\]/\\&/g')
-          sed -i "s|GF_DATABASE_USER_PLACEHOLDER|$GF_DB_USER_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
-          sed -i "s|GF_DATABASE_PASSWORD_PLACEHOLDER|$GF_DB_PASS_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
           if [ "${{ github.ref_name }}" = "main" ]; then
-            GF_SMTP_USER_ESCAPED=$(printf '%s' "${{ env.GF_SMTP_USER }}" | sed 's/[&/\]/\\&/g')
-            GF_SMTP_PASS_ESCAPED=$(printf '%s' "${{ env.GF_SMTP_PASSWORD }}" | sed 's/[&/\]/\\&/g')
-            sed -i "s|GF_SMTP_USER_PLACEHOLDER|$GF_SMTP_USER_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
-            sed -i "s|GF_SMTP_PASSWORD_PLACEHOLDER|$GF_SMTP_PASS_ESCAPED|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+            sed -i "s|GF_SMTP_USER_PLACEHOLDER|${{ env.GF_SMTP_USER }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
+            sed -i "s|GF_SMTP_PASSWORD_PLACEHOLDER|${{ env.GF_SMTP_PASSWORD }}|g" Manifest_files/${{ env.DEPLOYMENT_FILE }}
           fi
           grep -q "${{ env.GF_DATABASE_USER }}" Manifest_files/${{ env.DEPLOYMENT_FILE }} || (echo "Error: GF_DATABASE_USER not replaced" && exit 1)
           grep -q "${{ env.GF_DATABASE_PASSWORD }}" Manifest_files/${{ env.DEPLOYMENT_FILE }} || (echo "Error: GF_DATABASE_PASSWORD not replaced" && exit 1)
