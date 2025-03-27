@@ -46,9 +46,9 @@ spec:
             - name: GF_SMTP_HOST
               value: "email-smtp.us-east-1.amazonaws.com:587"  # Replace with your SES SMTP endpoint (region)
             - name: GF_SMTP_USER
-              value: "AKIA2LIPZ5WAEVKMDOD5"  # Replace with your SES SMTP username
+              value: "GF_SMTP_USER_PLACEHOLDER"   #added in github secrets
             - name: GF_SMTP_PASSWORD
-              value: "BMWmyCAcz3SDcrcQGRMbADR6RE5kk5RTMqXyNgEaFDWC"  # Replace with your SES SMTP password
+              value: "GF_SMTP_PASSWORD_PLACEHOLDER"   #added in github secrets
             - name: GF_SMTP_FROM_ADDRESS
               value: "srinivasulun@mycloudbuilders.com"  # Replace with your SES verified email address
             - name: GF_SMTP_FROM_NAME
@@ -68,9 +68,9 @@ spec:
             - name: GF_DATABASE_NAME
               value: "grafana-postgres"
             - name: GF_DATABASE_USER
-              value: "postgres"
+              value: "GF_DATABASE_USER_PLACEHOLDER"  #added in github secrets
             - name: GF_DATABASE_PASSWORD
-              value: "Cbgrafana32" # Directly provided password without a secret
+              value: "GF_DATABASE_PASSWORD_PLACEHOLDER"  #added in github secrets
             - name: GF_DATABASE_SSL_MODE
               value: "verify-full" # SSL is disabled since no certificate is used
             - name: GF_DATABASE_CA_CERT_PATH

@@ -49,9 +49,9 @@ spec:
             - name: GF_DATABASE_NAME
               value: "grafana-dev"
             - name: GF_DATABASE_USER
-              value: "postgres"
+              value: "GF_DATABASE_USER_PLACEHOLDER"  #added in github secrets
             - name: GF_DATABASE_PASSWORD
-              value: "Postgres123" # Directly provided password without a secret
+              value: "GF_DATABASE_PASSWORD_PLACEHOLDER"   #added in github secrets
             - name: GF_DATABASE_SSL_MODE
               value: "verify-full" # SSL is disabled since no certificate is used
             - name: GF_DATABASE_CA_CERT_PATH
