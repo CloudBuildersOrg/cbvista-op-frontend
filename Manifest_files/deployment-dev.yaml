@@ -56,6 +56,9 @@ spec:
               value: "verify-full" # SSL is disabled since no certificate is used
             - name: GF_DATABASE_CA_CERT_PATH
               value: "/etc/ssl/certs/rds-ca.pem"
+            
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-clickhouse-datasource"
 
             # Plugin & TLS Configurations
             - name: GF_PLUGIN_TLS_SKIP_VERIFY
