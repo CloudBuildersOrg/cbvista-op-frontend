@@ -66,6 +66,15 @@ spec:
             - name: GF_HTTP_TLS_SKIP_VERIFY
               value: "true"
 
+            - name: GF_CACHING_ENABLED
+              value: "true"
+            - name: GF_CACHING_BACKEND
+              value: "redis"
+            - name: GF_CACHING_REDIS_CONNSTR
+              value: "redis://:$(REDIS_PASSWORD)@redis-service.monitoring.svc.cluster.local:6379/0?pool_size=100&timeout=10s"
+            - name: REDIS_PASSWORD
+              value: "Driif!prod"
+
           volumeMounts:
             - name: grafana-storage
               mountPath: /var/lib/grafana
