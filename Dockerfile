@@ -27,7 +27,7 @@ COPY LICENSE ./
 COPY conf/defaults.ini ./conf/defaults.ini
 COPY e2e e2e
  
-RUN apk add --no-cache make build-base python3
+RUN apk add --no-cache make build-base python3 cmake gcc g++ libstdc++ git
  
 RUN yarn install --immutable
  
