@@ -50,7 +50,7 @@ describe('DashboardSceneRenderer', () => {
               builtIn: 1,
               datasource: {
                 type: 'grafana',
-                uid: '-- Grafana --',
+                uid: '-- CB Vista --',
               },
               enable: false,
               hide: true,

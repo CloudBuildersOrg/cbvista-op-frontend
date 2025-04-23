@@ -369,7 +369,7 @@ describe.each([
   });
 });
 
-describe('Grafana alertmanager - config API', () => {
+describe('CB Vista alertmanager - config API', () => {
   it('Converts matchers to object_matchers for grafana alertmanager', async () => {
     const { user } = renderNotificationPolicies();
 
@@ -385,7 +385,7 @@ describe('Grafana alertmanager - config API', () => {
     expect(updatedConfig.alertmanager_config.route?.routes?.[policyIndex].object_matchers).toMatchSnapshot();
   });
 });
-describe('Non-Grafana alertmanagers', () => {
+describe('Non-CB Vista alertmanagers', () => {
   it.skip('Shows an empty config when config returns an error and the AM supports lazy config initialization', async () => {
     makeAllAlertmanagerConfigFetchFail(getErrorResponse('alertmanager storage object not found'));
     setAlertmanagerStatus(dataSources.mimir.uid, someCloudAlertManagerStatus);

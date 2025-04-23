@@ -43,7 +43,7 @@ const LoginBackground: FC<BrandComponentProps> = ({ className, children }) => {
 };
 
 const MenuLogo: FC<BrandComponentProps> = ({ className }) => {
-  return <img className={className} src="public/img/grafana_icon.svg" alt="Grafana" />;
+  return <img className={className} src="public/img/grafana_icon.svg" alt="CB Vista" />;
 };
 
 const LoginBoxBackground = () => {
@@ -59,8 +59,8 @@ export class Branding {
   static LoginBackground = LoginBackground;
   static MenuLogo = MenuLogo;
   static LoginBoxBackground = LoginBoxBackground;
-  static AppTitle = 'Grafana';
-  static LoginTitle = 'Welcome to Grafana';
+  static AppTitle ='CB Vista';
+  static LoginTitle = 'Welcome to CB Vista';
   static HideEdition = false;
   static GetLoginSubTitle = (): null | string => {
     return null;

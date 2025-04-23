@@ -65,8 +65,8 @@ export const ConfigEditor = (props: Props) => {
           />
         </InlineField>
         <InlineField
-          label="Receive Grafana Alerts"
-          tooltip="When enabled, Grafana-managed alerts are sent to this Alertmanager."
+          label="Receive CB Vista Alerts"
+          tooltip="When enabled, CB Vista-managed alerts are sent to this Alertmanager."
           labelWidth={26}
         >
           <InlineSwitch
