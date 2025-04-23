@@ -4,7 +4,7 @@
 # "docker.languageserver.formatter.ignoreMultilineInstructions": true
  
 ARG BASE_IMAGE=alpine:3.21
-ARG JS_IMAGE=node:20-alpine
+ARG JS_IMAGE=node:20-slim
 ARG JS_PLATFORM=linux/arm64
 ARG GO_IMAGE=golang:1.23.5-alpine
  
@@ -14,11 +14,11 @@ ARG JS_SRC=js-builder
  
 # Javascript build stage
 FROM --platform=${JS_PLATFORM} ${JS_IMAGE} AS js-builder
- 
+
 ENV NODE_OPTIONS=--max_old_space_size=8000
- 
+
 WORKDIR /tmp/grafana
- 
+
 COPY package.json project.json nx.json yarn.lock .yarnrc.yml ./
 COPY .yarn .yarn
 COPY packages packages
@@ -26,8 +26,10 @@ COPY public public
 COPY LICENSE ./
 COPY conf/defaults.ini ./conf/defaults.ini
 COPY e2e e2e
-RUN apk add --no-cache make build-base python3 cmake gcc g++ libstdc++ git
-RUN yarn install --immutable
+
+RUN apt-get update && apt-get install -y make gcc g++ python3 git && rm -rf /var/lib/apt/lists/*
+
+RUN yarn install --immutable || (find /tmp -name '*.log' -exec cat {} \;; exit 1)
 
 COPY tsconfig.json eslint.config.js .editorconfig .browserslistrc .prettierrc.js ./
 COPY scripts scripts
