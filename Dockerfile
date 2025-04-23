@@ -4,7 +4,7 @@
 # "docker.languageserver.formatter.ignoreMultilineInstructions": true
  
 ARG BASE_IMAGE=alpine:3.21
-ARG JS_IMAGE=node:22-alpine
+ARG JS_IMAGE=node:20-alpine
 ARG JS_PLATFORM=linux/arm64
 ARG GO_IMAGE=golang:1.23.5-alpine
  
@@ -26,11 +26,9 @@ COPY public public
 COPY LICENSE ./
 COPY conf/defaults.ini ./conf/defaults.ini
 COPY e2e e2e
- 
 RUN apk add --no-cache make build-base python3 cmake gcc g++ libstdc++ git
- 
 RUN yarn install --immutable
- 
+
 COPY tsconfig.json eslint.config.js .editorconfig .browserslistrc .prettierrc.js ./
 COPY scripts scripts
 COPY emails emails
