@@ -62,11 +62,6 @@ jobs:
         with:
           version: 'v1.24.0'
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -84,7 +79,7 @@ jobs:
 
           echo "Building Docker Image: $IMAGE_URI"
 
-          docker buildx build --platform linux/arm64 -t custom-grafana .
+          docker build -t custom-grafana .
           docker tag custom-grafana "$IMAGE_URI"
           docker push "$IMAGE_URI"
 
