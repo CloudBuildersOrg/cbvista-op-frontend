@@ -58,7 +58,7 @@ spec:
               value: "/etc/ssl/certs/rds-ca.pem"
             
             - name: GF_INSTALL_PLUGINS
-              value: "grafana-clickhouse-datasource"
+              value: "grafana-clickhouse-datasource, marcusolsson-json-datasource"
 
             # Plugin & TLS Configurations
             - name: GF_PLUGIN_TLS_SKIP_VERIFY
