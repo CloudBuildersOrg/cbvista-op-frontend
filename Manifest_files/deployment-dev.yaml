@@ -56,6 +56,10 @@ spec:
               value: "verify-full" # SSL is disabled since no certificate is used
             - name: GF_DATABASE_CA_CERT_PATH
               value: "/etc/ssl/certs/rds-ca.pem"
+
+            # Authentication Configuration (Fix for orgs:create permission issue)
+            - name: GF_AUTH_ALLOW_ORG_CREATE
+              value: "true"  # Enable organization creation via API
             
             - name: GF_INSTALL_PLUGINS
               value: "grafana-clickhouse-datasource, marcusolsson-json-datasource"
