@@ -58,7 +58,7 @@ spec:
               value: "/etc/ssl/certs/rds-ca.pem"
 
             # Authentication Configuration (Fix for orgs:create permission issue)
-            - name: GF_AUTH_ALLOW_ORG_CREATE
+            - name: GF_USERS_ALLOW_ORG_CREATE
               value: "true"  # Enable organization creation via API
             
             - name: GF_INSTALL_PLUGINS
