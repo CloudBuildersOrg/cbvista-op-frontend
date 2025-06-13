@@ -79,7 +79,14 @@ spec:
               value: "true"
             - name: GF_HTTP_TLS_SKIP_VERIFY
               value: "true"
- 
+            
+            - name: GF_USERS_ALLOW_ORG_CREATE
+              value: "true"  # Enable organization creation via API
+            
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-clickhouse-datasource, marcusolsson-json-datasource"
+
+
             # Plugin & TLS Configurations
             - name: GF_ALERTING_TLS_SKIP_VERIFY
               value: "true"
