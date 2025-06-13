@@ -6,7 +6,7 @@ metadata:
   labels:
     app: grafana-frontend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: grafana-frontend
@@ -57,6 +57,13 @@ spec:
             - name: GF_DATABASE_CA_CERT_PATH
               value: "/etc/ssl/certs/rds-ca.pem"
 
+            # Authentication Configuration (Fix for orgs:create permission issue)
+            - name: GF_USERS_ALLOW_ORG_CREATE
+              value: "true"  # Enable organization creation via API
+            
+            - name: GF_INSTALL_PLUGINS
+              value: "grafana-clickhouse-datasource, marcusolsson-json-datasource"
+
             # Plugin & TLS Configurations
             - name: GF_PLUGIN_TLS_SKIP_VERIFY
               value: "true"
@@ -71,13 +78,13 @@ spec:
               subPath: rds-ca.pem
               readOnly: true
 
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "500m"
-              memory: "1024Mi"
+          # resources:
+          #   requests:
+          #     cpu: "250m"
+          #     memory: "512Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "1024Mi"
 
       volumes:
         - name: grafana-storage
