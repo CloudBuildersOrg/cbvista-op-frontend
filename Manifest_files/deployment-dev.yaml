@@ -62,7 +62,7 @@ spec:
               value: "true"  # Enable organization creation via API
             
             - name: GF_INSTALL_PLUGINS
-              value: "grafana-clickhouse-datasource, marcusolsson-json-datasource"
+              value: "grafana-clickhouse-datasource, grafana-athena-datasource"
 
             # Plugin & TLS Configurations
             - name: GF_PLUGIN_TLS_SKIP_VERIFY
