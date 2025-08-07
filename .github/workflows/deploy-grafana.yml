@@ -3,7 +3,7 @@ name: CBT-Vista-Grafana-Frontend
 on:
   push:
     branches:
-      - develop
+      #- develop
       #- sandbox
       - main
   workflow_dispatch:
