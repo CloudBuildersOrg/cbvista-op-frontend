@@ -64,7 +64,7 @@ spec:
             - name: GF_DATABASE_TYPE
               value: "postgres"
             - name: GF_DATABASE_HOST
-              value: "grafana-db.czo2u80k8ov3.us-east-1.rds.amazonaws.com:5432"
+              value: "backup-grafana-rds.czo2u80k8ov3.us-east-1.rds.amazonaws.com:5432"
             - name: GF_DATABASE_NAME
               value: "grafana-postgres"
             - name: GF_DATABASE_USER
