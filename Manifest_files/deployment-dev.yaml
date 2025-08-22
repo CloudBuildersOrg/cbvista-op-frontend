@@ -6,7 +6,7 @@ metadata:
   labels:
     app: grafana-frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: grafana-frontend
@@ -22,6 +22,10 @@ spec:
       labels:
         app: grafana-frontend
     spec:
+      securityContext:
+        fsGroup: 472
+        runAsUser: 472
+        runAsGroup: 472
       containers:
         - name: grafana
           image: NEW_ECR_IMAGE  # 🔹 Updated by GitHub Actions
