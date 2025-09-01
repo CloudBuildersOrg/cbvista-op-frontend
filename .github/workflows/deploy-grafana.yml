@@ -3,7 +3,7 @@ name: CBT-Vista-Grafana-Frontend
 on:
   push:
     branches:
-      - develop
+      #- develop
       #- sandbox
       - main
   workflow_dispatch:
@@ -21,17 +21,17 @@ jobs:
       - name: Set Environment Variables
         run: |
           case "${{ github.ref_name }}" in
-            "develop")
-              echo "DEPLOY_NAMESPACE=monitoring" >> $GITHUB_ENV
-              echo "AWS_REGION=${{ secrets.DEV_AWS_REGION }}" >> $GITHUB_ENV
-              echo "ECR_REPOSITORY=${{ secrets.DEV_ECR_REPOSITORY }}" >> $GITHUB_ENV
-              echo "EKS_CLUSTER_NAME=${{ secrets.DEV_EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
-              echo "AWS_ACCOUNT_ID=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
-              echo "AWS_ROLE_TO_ASSUME=${{ secrets.DEV_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
-              echo "GF_DATABASE_USER=${{ secrets.DEV_DB_USER }}" >> $GITHUB_ENV
-              echo "GF_DATABASE_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> $GITHUB_ENV
-              echo "DEPLOYMENT_FILE=deployment-dev.yaml" >> $GITHUB_ENV
-              ;;
+            # "develop")
+            #   echo "DEPLOY_NAMESPACE=monitoring" >> $GITHUB_ENV
+            #   echo "AWS_REGION=${{ secrets.DEV_AWS_REGION }}" >> $GITHUB_ENV
+            #   echo "ECR_REPOSITORY=${{ secrets.DEV_ECR_REPOSITORY }}" >> $GITHUB_ENV
+            #   echo "EKS_CLUSTER_NAME=${{ secrets.DEV_EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
+            #   echo "AWS_ACCOUNT_ID=${{ secrets.DEV_AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
+            #   echo "AWS_ROLE_TO_ASSUME=${{ secrets.DEV_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
+            #   echo "GF_DATABASE_USER=${{ secrets.DEV_DB_USER }}" >> $GITHUB_ENV
+            #   echo "GF_DATABASE_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> $GITHUB_ENV
+            #   echo "DEPLOYMENT_FILE=deployment-dev.yaml" >> $GITHUB_ENV
+            #   ;;
             "main")
               echo "DEPLOY_NAMESPACE=vista-prod" >> $GITHUB_ENV
               echo "AWS_REGION=${{ secrets.PROD_AWS_REGION }}" >> $GITHUB_ENV
