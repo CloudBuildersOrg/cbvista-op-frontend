@@ -82,17 +82,22 @@ spec:
             #   subPath: rds-ca.pem
             #   readOnly: true
 
-          # resources:
-          #   requests:
-          #     cpu: "250m"
-          #     memory: "512Mi"
-          #   limits:
-          #     cpu: "500m"
-          #     memory: "1024Mi"
-
       volumes:
         - name: grafana-storage
-          emptyDir: {}
-        # - name: rds-ca-cert
-        #   secret:
-        #     secretName: rds-ca-cert
+          persistentVolumeClaim:
+            claimName: grafana-ebs-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-ebs-pvc
+  namespace: DEPLOY_NAMESPACE
+  labels:
+    app: grafana-frontend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi  # Adjust size as needed
+  storageClassName: gp2  # Updated to use the default gp2 StorageClass
