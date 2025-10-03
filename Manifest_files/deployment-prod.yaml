@@ -41,30 +41,30 @@ spec:
               value: "3000"
 
               #smtp configuration
-            - name: GF_SMTP_ENABLED
-              value: "true"
-            - name: GF_SMTP_HOST
-              value: "email-smtp.us-east-1.amazonaws.com:587"  # Replace with your SES SMTP endpoint (region)
-            - name: GF_SMTP_USER
-              value: "GF_SMTP_USER_PLACEHOLDER"   #added in github secrets
-            - name: GF_SMTP_PASSWORD
-              value: "GF_SMTP_PASSWORD_PLACEHOLDER"   #added in github secrets
-            - name: GF_SMTP_FROM_ADDRESS
-              value: "srinivasulun@mycloudbuilders.com"  # Replace with your SES verified email address
-            - name: GF_SMTP_FROM_NAME
-              value: "Grafana Alerts"
-            - name: GF_SMTP_SKIP_VERIFY
-              value: "true"
-            - name: GF_SMTP_STARTTLS
-              value: "true"
-            - name: GF_SMTP_EHLO_IDENTITY
-              value: "localhost"
+            # - name: GF_SMTP_ENABLED
+            #   value: "true"
+            # - name: GF_SMTP_HOST
+            #   value: "email-smtp.us-east-1.amazonaws.com:587"  # Replace with your SES SMTP endpoint (region)
+            # - name: GF_SMTP_USER
+            #   value: "GF_SMTP_USER_PLACEHOLDER"   #added in github secrets
+            # - name: GF_SMTP_PASSWORD
+            #   value: "GF_SMTP_PASSWORD_PLACEHOLDER"   #added in github secrets
+            # - name: GF_SMTP_FROM_ADDRESS
+            #   value: "srinivasulun@mycloudbuilders.com"  # Replace with your SES verified email address
+            # - name: GF_SMTP_FROM_NAME
+            #   value: "Grafana Alerts"
+            # - name: GF_SMTP_SKIP_VERIFY
+            #   value: "true"
+            # - name: GF_SMTP_STARTTLS
+            #   value: "true"
+            # - name: GF_SMTP_EHLO_IDENTITY
+            #   value: "localhost"
 
             # Database Configuration
             - name: GF_DATABASE_TYPE
               value: "postgres"
             - name: GF_DATABASE_HOST
-              value: "grafana-backup-rds.czo2u80k8ov3.us-east-1.rds.amazonaws.com:5432"
+              value: "grafana-db-backup.clawco200p5a.ap-south-1.rds.amazonaws.com"
             - name: GF_DATABASE_NAME
               value: "grafana-postgres"
             - name: GF_DATABASE_USER
