@@ -41,8 +41,8 @@ jobs:
               echo "AWS_ROLE_TO_ASSUME=${{ secrets.PROD_AWS_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
               echo "GF_DATABASE_USER=${{ secrets.PROD_DB_USER }}" >> $GITHUB_ENV
               echo "GF_DATABASE_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}" >> $GITHUB_ENV
-              echo "GF_SMTP_USER=${{ secrets.PROD_SMTP_USER }}" >> $GITHUB_ENV
-              echo "GF_SMTP_PASSWORD=${{ secrets.PROD_SMTP_PASSWORD }}" >> $GITHUB_ENV
+              # echo "GF_SMTP_USER=${{ secrets.PROD_SMTP_USER }}" >> $GITHUB_ENV
+              # echo "GF_SMTP_PASSWORD=${{ secrets.PROD_SMTP_PASSWORD }}" >> $GITHUB_ENV
               echo "DEPLOYMENT_FILE=deployment-prod.yaml" >> $GITHUB_ENV
               ;;
             *)
